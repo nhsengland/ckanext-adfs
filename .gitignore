@@ -1,0 +1,4 @@
+*.pyc
+*.swp
+*~
+ckanext_adfs.egg-info/*
