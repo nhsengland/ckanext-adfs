@@ -77,7 +77,13 @@ class ADFSPlugin(plugins.SingletonPlugin):
         """
         Called at logout.
         """
-        pass
+        keys_to_delete = [key for key in pylons.session
+                          if key.startswith('adfs')]
+        if keys_to_delete:
+            for key in keys_to_delete:
+                del pylons.session[key]
+            pylons.session.save()
+
 
     def abort(self, status_code, detail, headers, comment):
         """
