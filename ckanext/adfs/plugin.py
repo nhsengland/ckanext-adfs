@@ -2,11 +2,12 @@
 Plugin for our ADFS
 """
 import logging
-import xml.etree.ElementTree as ET
+import lxml.etree as ET
 import ckan.plugins as plugins
 import ckan.plugins.toolkit as toolkit
 import pylons
 import uuid
+from validation import validate_saml
 
 log = logging.getLogger(__name__)
 
@@ -109,7 +110,10 @@ class ADFSRedirectController(toolkit.BaseController):
         """
         Handle eggsmell request from the ADFS redirect_uri.
         """
-        root = ET.fromstring(pylons.request.POST['wresult'])
+        eggsmell = pylons.request.POST['wresult']
+        if not validate_saml(eggsmell):
+            raise ValueError('Invalid signature')
+        root = ET.fromstring(eggsmell)
         # Honestly..!
         attributes = [z for z in
                          [y for y in
@@ -131,6 +135,7 @@ class ADFSRedirectController(toolkit.BaseController):
 
         user = _get_user(email)
         if not user:
+            # TODO: Add the new user to the NHSEngland group? Check this!
             user = toolkit.get_action('user_create')(
                 context={'ignore_auth': True},
                 data_dict={'name': email,

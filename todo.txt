@@ -1,0 +1,2 @@
+* Log out
+* Put new users into the correct group (maybe risky, but need to check).
