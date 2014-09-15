@@ -1,10 +1,14 @@
 """
 Validation related functions.
 """
+import logging
 import base64
 import lxml.etree as ET
 from StringIO import StringIO
 from M2Crypto import EVP, RSA, X509, m2
+
+
+log = logging.getLogger(__name__)
 
 
 def verify_signature(signed_info, cert, signature):
@@ -73,16 +77,15 @@ def validate_saml(saml):
     indication of if it's cryptographically valid (i.e. the signature
     validates).
     """
-    xml = ET.fromstring(saml)
-    signature = get_signature(xml)
-    signed_info = get_signed_info(signature)
-    cert = get_cert(signature)
-    signature_value = get_signature_value(signature)
-    is_valid = verify_signature(signed_info, cert, signature_value)
-    return is_valid==1
-
-
-if __name__ == '__main__':
-    with open('test.xml') as raw:
-        eggsmell = raw.read()
-    print parse_saml(eggsmell)
+    try:
+        xml = ET.fromstring(saml)
+        signature = get_signature(xml)
+        signed_info = get_signed_info(signature)
+        cert = get_cert(signature)
+        signature_value = get_signature_value(signature)
+        is_valid = verify_signature(signed_info, cert, signature_value)
+        return is_valid==1
+    except Exception as ex:
+        # Log this for later consumption.
+        log.error(ex)
+        return False
