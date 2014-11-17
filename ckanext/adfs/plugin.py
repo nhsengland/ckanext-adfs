@@ -142,13 +142,14 @@ class ADFSRedirectController(toolkit.BaseController):
         user = _get_user(email)
         if not user:
             # TODO: Add the new user to the NHSEngland group? Check this!
+            username = email.split('@', 1)[0].replace('.', '_').lower()
             user = toolkit.get_action('user_create')(
                 context={'ignore_auth': True},
-                data_dict={'name': email,
+                data_dict={'name': username,
                            'fullname': firstname + ' ' + surname,
                            'password': str(uuid.uuid4()),
                            'email': email})
-        pylons.session['adfs-user'] = email
+        pylons.session['adfs-user'] = username
         pylons.session['adfs-email'] = email
         pylons.session.save()
         toolkit.redirect_to(controller='user', action='dashboard',
