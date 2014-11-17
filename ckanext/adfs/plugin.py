@@ -141,8 +141,12 @@ class ADFSRedirectController(toolkit.BaseController):
 
         user = _get_user(email)
         if not user:
+            log.info('Creating user from ADFS')
+            log.info('email: {} firstname: {} surname: {}'.format(email,
+                     firstname, surname))
             # TODO: Add the new user to the NHSEngland group? Check this!
             username = email.split('@', 1)[0].replace('.', '_').lower()
+            log.info('Generated username: {}'.format(username))
             user = toolkit.get_action('user_create')(
                 context={'ignore_auth': True},
                 data_dict={'name': username,
