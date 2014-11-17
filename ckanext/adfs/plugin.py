@@ -139,14 +139,16 @@ class ADFSRedirectController(toolkit.BaseController):
             elif a.attrib['Name'].endswith('claims/name'):
                 email = a[0].text
 
-        user = _get_user(email)
-        if not user:
+        username = email.split('@', 1)[0].replace('.', '_').lower()
+        user = _get_user(username)
+        if user:
+            log.info('Logging in from ADFS with user: {}'.format(username))
+        else:
             log.info('Creating user from ADFS')
             log.info('email: {} firstname: {} surname: {}'.format(email,
                      firstname, surname))
-            # TODO: Add the new user to the NHSEngland group? Check this!
-            username = email.split('@', 1)[0].replace('.', '_').lower()
             log.info('Generated username: {}'.format(username))
+            # TODO: Add the new user to the NHSEngland group? Check this!
             user = toolkit.get_action('user_create')(
                 context={'ignore_auth': True},
                 data_dict={'name': username,
