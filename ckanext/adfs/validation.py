@@ -71,17 +71,21 @@ def get_signature_value(signature):
             '{http://www.w3.org/2000/09/xmldsig#}SignatureValue').text
 
 
-def validate_saml(saml):
+def validate_saml(saml, x509):
     """
     Given a string representation of a SAML response will return a boolean
     indication of if it's cryptographically valid (i.e. the signature
-    validates).
+    validates). The x509 argument is a string representation of the expected
+    certificate incoming in the SAML.
     """
     try:
         xml = ET.fromstring(saml)
         signature = get_signature(xml)
         signed_info = get_signed_info(signature)
         cert = get_cert(signature)
+        if x509 != cert:
+            # Ensure the SAML certificate is the same as the expected cert.
+            return False
         signature_value = get_signature_value(signature)
         is_valid = verify_signature(signed_info, cert, signature_value)
         return is_valid==1

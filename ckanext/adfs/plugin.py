@@ -9,12 +9,36 @@ import pylons
 import uuid
 from validation import validate_saml
 
+
 log = logging.getLogger(__name__)
 
 
+# Some awful XML munging.
+X509 = ''
+WSFED_ENDPOINT = ''
+WTREALM = pylons.config['adfs_wtrealm']
+with open(pylons.config['adfs_federation_metadata_path']) as federation_meta:
+    METADATA = ET.fromstring(federation_meta.read())
+    for child in list(METADATA):
+        service_type = child.attrib.get('{http://www.w3.org/2001/XMLSchema-instance}type', None)
+        if service_type == 'fed:ApplicationServiceType':
+            X509 = child.find('{urn:oasis:names:tc:SAML:2.0:metadata}KeyDescriptor').xpath('string()')
+            WSFED_ENDPOINT = child.find('{http://docs.oasis-open.org/wsfed/federation/200706}PassiveRequestorEndpoint').xpath('string()')
+            break
+
+
+if not (X509 and WSFED_ENDPOINT):
+    raise ValueError('Unable to read X509 or WSFED_ENDPOINT values for ADFS plugin.')
+
+
 def adfs_authentication_endpoint():
-    url = pylons.config['adfs_authentication_endpoint']
-    return url
+    url_template = '{}?wa=wsignin1.0&wreq=xml&wtrealm={}'
+    return url_template.format(WSFED_ENDPOINT, WTREALM)
+
+
+def is_adfs_user():
+    return pylons.session.get('adfs-user')
+
 
 class ADFSPlugin(plugins.SingletonPlugin):
     """
@@ -32,7 +56,8 @@ class ADFSPlugin(plugins.SingletonPlugin):
         toolkit.add_template_directory(config, 'templates')
 
     def get_helpers(self):
-        return dict(adfs_authentication_endpoint=adfs_authentication_endpoint)
+        return dict(is_adfs_user=is_adfs_user,
+                    adfs_authentication_endpoint=adfs_authentication_endpoint)
 
     def before_map(self, map):
         """
@@ -117,7 +142,7 @@ class ADFSRedirectController(toolkit.BaseController):
         Handle eggsmell request from the ADFS redirect_uri.
         """
         eggsmell = pylons.request.POST['wresult']
-        if not validate_saml(eggsmell):
+        if not validate_saml(eggsmell, X509):
             raise ValueError('Invalid signature')
         root = ET.fromstring(eggsmell)
         # Honestly..!
