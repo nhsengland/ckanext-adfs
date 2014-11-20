@@ -164,6 +164,11 @@ class ADFSRedirectController(toolkit.BaseController):
             elif a.attrib['Name'].endswith('claims/name'):
                 email = a[0].text
 
+        if not email:
+            log.error('Unable to login with ADFS')
+            log.error(eggsmell)
+            raise ValueError('No email returned with ADFS')
+
         username = email.split('@', 1)[0].replace('.', '_').lower()
         user = _get_user(username)
         if user:

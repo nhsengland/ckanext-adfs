@@ -6,19 +6,18 @@
   <fieldset>
     <legend>{{ _('Change details') }}</legend>
 
+
 {% if h.is_adfs_user %}
-<!-- Cannot change username, this comes from ADFS !-->
-{% else %}
+<div style="display: none;">
+{% endif %}
     {{ form.input('name', label=_('Username'), id='field-username', value=data.name, error=errors.name, classes=['control-medium'], is_required=true) }}
+
+    {{ form.input('email', label=_('Email'), id='field-email', type='email', value=data.email, error=errors.email, placeholder=_('eg. joe@example.com'), classes=['control-medium'], is_required=true) }}
+{% if h.is_adfs_user %}
+</div>
 {% endif %}
 
     {{ form.input('fullname', label=_('Full name'), id='field-fullname', value=data.fullname, error=errors.fullname, placeholder=_('eg. Joe Bloggs'), classes=['control-medium']) }}
-
-{% if h.is_adfs_user %}
-<!-- Cannot change email address, this comes from ADFS !-->
-{% else %}
-    {{ form.input('email', label=_('Email'), id='field-email', type='email', value=data.email, error=errors.email, placeholder=_('eg. joe@example.com'), classes=['control-medium'], is_required=true) }}
-{% endif %}
 
     {{ form.markdown('about', label=_('About'), id='field-about', value=data.about, error=errors.about, placeholder=_('A little information about yourself')) }}
 
