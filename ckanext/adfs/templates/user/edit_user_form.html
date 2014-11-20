@@ -7,13 +7,13 @@
     <legend>{{ _('Change details') }}</legend>
 
 
-{% if h.is_adfs_user %}
+{% if h.is_adfs_user() %}
 <div style="display: none;">
 {% endif %}
     {{ form.input('name', label=_('Username'), id='field-username', value=data.name, error=errors.name, classes=['control-medium'], is_required=true) }}
 
     {{ form.input('email', label=_('Email'), id='field-email', type='email', value=data.email, error=errors.email, placeholder=_('eg. joe@example.com'), classes=['control-medium'], is_required=true) }}
-{% if h.is_adfs_user %}
+{% if h.is_adfs_user() %}
 </div>
 {% endif %}
 
@@ -29,7 +29,7 @@
 
   </fieldset>
 
-{% if h.is_adfs_user %}
+{% if h.is_adfs_user() %}
     <!-- Cannot change password for this account since it's ADFS. -->
 {% else %}
   <fieldset>

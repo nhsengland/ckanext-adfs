@@ -163,6 +163,8 @@ class ADFSRedirectController(toolkit.BaseController):
                 surname = a[0].text
             elif a.attrib['Name'].endswith('claims/name'):
                 email = a[0].text
+            elif a.attrib['Name'].endswith('emailaddress'):
+                email = a[0].text
 
         if not email:
             log.error('Unable to login with ADFS')
