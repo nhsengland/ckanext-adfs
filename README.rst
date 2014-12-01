@@ -25,8 +25,7 @@ In your CKAN's settings.ini file you need to provide two settings in the
 
 * adfs_wtrealm - the `APP ID URI` setting found in the "Get Started" / "Enable Users to Sign On" section on the "home" page for the application integrating with ADFS on the Azure website. This is usually the same as the APP ID URI you define in the settings for the application.
 
-* adfs_federation_metadata_path - a path to a local copy of the The ADFS_NAMESPACE and adfs_x509 related values can be found in the `FederationMetadata.xml` file associated with the application integrating with ADFS. This file can be
-downloaded from the URL in the "Federation Metadata Document URL" value also in the "Enable Users to Sign On" section
+* adfs_federation_metadata_path - a path to a local copy of the The ADFS_NAMESPACE and adfs_x509 related values can be found in the `FederationMetadata.xml` file associated with the application integrating with ADFS. This file can be downloaded from the URL in the "Federation Metadata Document URL" value also in the "Enable Users to Sign On" section
 
 *A WORD OF WARNING* Microsoft appears to change its UI in the Azure website quite often so you may need to poke around to find the correct settings.
 
