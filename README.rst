@@ -2,10 +2,28 @@ ckanext-adfs
 ------------
 
 A CKAN extension for validating users against Microsoft's Active Directory
-Federated Services (ADFS) API.
+Federated Services (ADFS) Single Sign On (SSO) API.
 
 See the requirements.txt file for third party modules needed for this to
 work (lxml and M2Crypto).
+
+What is ADFS?
+============
+
+Microsoft's Azure cloud-based offering provides Active Directory Federated
+Services (ADFS for short). As far as we can tell these have absolutely nothing
+to do with the "traditional" LDAP/ActiveDirectory we love to loath but is a
+confusion thought up by their marketing department. In essence it is possible
+to create an "Active Director" within Azure to define groups of users. ADFS
+is a way to allow such users to log in to some third party application (in this
+case it's your instance of CKAN) via your Azure active directory. For this to
+happen you'll need to create a new "application" (representing your CKAN
+instance) within the relevant Azure active directory. Microsoft have good
+documentation online for doing this.
+
+If you merely want to test this extension you can take out a free trial at the
+Azure website (although you'll need to provide credit card details to prove
+you're not a bot).
 
 Configure:
 =========
