@@ -7,14 +7,14 @@ Federated Services (ADFS) Single Sign On (SSO) API.
 See the requirements.txt file for third party modules needed for this to
 work (lxml and M2Crypto). You'll also need the following packages installed:
 
- * libxml2
- * libxml2-dev
- * libxslt1.1
- * libxslt1-dev
- * openssl
- * libssl-dev
- * swig
- * python-dev
+* libxml2
+* libxml2-dev
+* libxslt1.1
+* libxslt1-dev
+* openssl
+* libssl-dev
+* swig
+* python-dev
 
 What is ADFS?
 ============
