@@ -38,7 +38,7 @@ def get_signature(doc):
     """
     Get's the tag that includes the security token (signature).
     """
-    return get_tag(doc, 'RequestedSecurityToken')
+    return get_tag(doc, 'Signature')
 
 
 def get_signed_info(signature):
