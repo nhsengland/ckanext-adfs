@@ -15,15 +15,14 @@ log = logging.getLogger(__name__)
 
 
 # Some awful XML munging.
-X509 = ''
 WSFED_ENDPOINT = ''
 WTREALM = pylons.config['adfs_wtrealm']
 METADATA = get_federation_metadata(pylons.config['adfs_metadata_url'])
 WSFED_ENDPOINT = get_wsfed(METADATA)
 
 
-if not (X509 and WSFED_ENDPOINT):
-    raise ValueError('Unable to read X509 or WSFED_ENDPOINT values for ADFS plugin.')
+if not (WSFED_ENDPOINT):
+    raise ValueError('Unable to read WSFED_ENDPOINT values for ADFS plugin.')
 
 
 def adfs_authentication_endpoint():
