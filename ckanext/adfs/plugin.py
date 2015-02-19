@@ -7,7 +7,8 @@ import ckan.plugins as plugins
 import ckan.plugins.toolkit as toolkit
 import pylons
 import uuid
-from validation import validate_saml
+from validation import validate_saml, get_tag
+from metadata import get_certificates, get_federation_metadata, get_wsfed
 
 
 log = logging.getLogger(__name__)
@@ -17,14 +18,8 @@ log = logging.getLogger(__name__)
 X509 = ''
 WSFED_ENDPOINT = ''
 WTREALM = pylons.config['adfs_wtrealm']
-with open(pylons.config['adfs_federation_metadata_path']) as federation_meta:
-    METADATA = ET.fromstring(federation_meta.read())
-    for child in list(METADATA):
-        service_type = child.attrib.get('{http://www.w3.org/2001/XMLSchema-instance}type', None)
-        if service_type == 'fed:ApplicationServiceType':
-            X509 = child.find('{urn:oasis:names:tc:SAML:2.0:metadata}KeyDescriptor').xpath('string()')
-            WSFED_ENDPOINT = child.find('{http://docs.oasis-open.org/wsfed/federation/200706}PassiveRequestorEndpoint').xpath('string()')
-            break
+METADATA = get_federation_metadata(pylons.config['adfs_metadata_url'])
+WSFED_ENDPOINT = get_wsfed(METADATA)
 
 
 if not (X509 and WSFED_ENDPOINT):
@@ -142,16 +137,19 @@ class ADFSRedirectController(toolkit.BaseController):
         Handle eggsmell request from the ADFS redirect_uri.
         """
         eggsmell = pylons.request.POST['wresult']
-        if not validate_saml(eggsmell, X509):
+        # We grab the metadata for each login because due to opaque
+        # bureaucracy and lack of communication the certificates can be
+        # changed. We looked into this and took made the call based upon lack
+        # of user problems and tech being under our control vs the (small
+        # amount of) latency from a network call per login attempt.
+        metadata = get_federation_metadata(pylons.config['adfs_metadata_url'])
+        x509_certificates = get_certificates(metadata)
+        if not validate_saml(eggsmell, x509_certificates):
             raise ValueError('Invalid signature')
         root = ET.fromstring(eggsmell)
         # Honestly..!
-        attributes = [z for z in
-                         [y for y in
-                             [x for x in root if
-                                 x.tag.endswith('RequestedSecurityToken')][0]
-                         ][0]
-                      if z.tag.endswith('AttributeStatement')][0]
+        attributes = [tag for tag in root.iter('*')
+                      if tag.endswith('AttributeStatement')]
 
         email = None
         firstname = None

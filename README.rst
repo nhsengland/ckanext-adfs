@@ -4,6 +4,9 @@ ckanext-adfs
 A CKAN extension for validating users against Microsoft's Active Directory
 Federated Services (ADFS) Single Sign On (SSO) API.
 
+In layman's terms it lets you log in using some third-party source of
+authentication provided by Microsoft and beloved by BDOs (Big Dumb Orgs).
+
 See the requirements.txt file for third party modules needed for this to
 work (lxml and M2Crypto). You'll also need the following packages installed:
 
@@ -23,12 +26,13 @@ Microsoft's Azure cloud-based offering provides Active Directory Federated
 Services (ADFS for short). As far as we can tell these have absolutely nothing
 to do with the "traditional" LDAP/ActiveDirectory we love to loath but is a
 confusion thought up by their marketing department. In essence it is possible
-to create an "Active Director" within Azure to define groups of users. ADFS
+to create an "Active Directory" within Azure to define groups of users. ADFS
 is a way to allow such users to log in to some third party application (in this
-case it's your instance of CKAN) via your Azure active directory. For this to
+case it's your instance of CKAN) via said Azure active directory. For this to
 happen you'll need to create a new "application" (representing your CKAN
 instance) within the relevant Azure active directory. Microsoft have good
-documentation online for doing this.
+documentation online for doing this (although see the caveat about UI changes
+below).
 
 If you merely want to test this extension you can take out a free trial at the
 Azure website (although you'll need to provide credit card details to prove
@@ -52,9 +56,13 @@ In your CKAN's settings.ini file you need to provide two settings in the
 
 * adfs_wtrealm - the `APP ID URI` setting found in the "Get Started" / "Enable Users to Sign On" section on the "home" page for the application integrating with ADFS on the Azure website. This is usually the same as the APP ID URI you define in the settings for the application.
 
-* adfs_federation_metadata_path - a path to a local copy of the The ADFS_NAMESPACE and adfs_x509 related values can be found in the `FederationMetadata.xml` file associated with the application integrating with ADFS. This file can be downloaded from the URL in the "Federation Metadata Document URL" value also in the "Enable Users to Sign On" section
+* adfs_metadata_url - a URL pointing to a remote file called `FederationMetadata.xml` containing the ADFS_NAMESPACE and adfs_x509 related values. This URL is in the "Federation Metadata Document URL" value in the "Enable Users to Sign On" section of the Azure website (at current time of writing).
 
-*A WORD OF WARNING* Microsoft appears to change its UI in the Azure website quite often so you may need to poke around to find the correct settings.
+*A WORD OF WARNING* Microsoft appears to change its UI in the Azure website
+quite often so you may need to poke around to find the correct settings. It has
+been our experience that their otherwise excellent documentation doesn't
+always stay up-to-date and/or Google doesn't point to the most current version
+of the documentation. YMMV.
 
 Development Environment:
 =======================
