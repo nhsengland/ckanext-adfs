@@ -9,6 +9,13 @@ from M2Crypto import EVP, X509
 
 log = logging.getLogger(__name__)
 
+def get_tag(doc, tagname):
+    """
+    Assume that you don't care about namespaces
+    """
+    for t in doc.iter('*'):
+        if t.tag.endswith(tagname):
+            return t
 
 def get_tag(doc, tagname):
     """
