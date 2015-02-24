@@ -17,7 +17,7 @@ def get_certificates(metadata):
     type_path = '{http://www.w3.org/2001/XMLSchema-instance}type'
     key_descriptor_path = '{urn:oasis:names:tc:SAML:2.0:metadata}KeyDescriptor'
     try:
-        dom = ET.fromstring(metadata)
+        dom = ET.fromstring(str(metadata))
         for child in list(dom):
             service_type = child.attrib.get(type_path, None)
             if service_type == 'fed:ApplicationServiceType':
@@ -37,7 +37,7 @@ def get_federation_metadata(url):
     """
     response = requests.get(url)
     if response.status_code < 400:
-        return response.text
+        return response.text.replace(u'\ufeff', '')
     else:
         raise ValueError('Metadata response: {}'.format(response.status_code))
 
@@ -50,7 +50,7 @@ def get_wsfed(metadata):
     type_path = '{http://www.w3.org/2001/XMLSchema-instance}type'
     wsfed_path = '{http://docs.oasis-open.org/wsfed/federation/200706}PassiveRequestorEndpoint'
     try:
-        dom = ET.fromstring(metadata)
+        dom = ET.fromstring(str(metadata))
         for child in list(dom):
             service_type = child.attrib.get(type_path, None)
             if service_type == 'fed:ApplicationServiceType':
