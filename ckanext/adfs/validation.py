@@ -91,7 +91,7 @@ def validate_saml(saml, x509_certificates):
             # To save some time in the future when we need to see broken SAML.
             log.error('INVALID SAML')
             log.error(saml)
-        return is_valid==1
+        return is_valid == 1
     except Exception as ex:
         # Log this for later consumption.
         log.error('ADFS validation error')

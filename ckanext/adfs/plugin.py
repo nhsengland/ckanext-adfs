@@ -2,12 +2,11 @@
 Plugin for our ADFS
 """
 import logging
-import lxml.etree as ET
 import ckan.plugins as plugins
 import ckan.plugins.toolkit as toolkit
 import pylons
 import uuid
-from validation import validate_saml, get_tag
+from validation import validate_saml
 from metadata import get_certificates, get_federation_metadata, get_wsfed
 from extract import get_user_info
 
