@@ -9,6 +9,7 @@ import pylons
 import uuid
 from validation import validate_saml, get_tag
 from metadata import get_certificates, get_federation_metadata, get_wsfed
+from extract import get_user_info
 
 
 log = logging.getLogger(__name__)
@@ -145,34 +146,19 @@ class ADFSRedirectController(toolkit.BaseController):
         x509_certificates = get_certificates(metadata)
         if not validate_saml(eggsmell, x509_certificates):
             raise ValueError('Invalid signature')
-        root = ET.fromstring(eggsmell)
-        # Honestly..!
-        attributes = [tag for tag in root.iter('*')
-                      if tag.endswith('AttributeStatement')]
-
-        email = None
-        firstname = None
-        surname = None
-        for a in attributes:
-            if a.attrib['Name'].endswith('givenname'):
-                firstname = a[0].text
-            elif a.attrib['Name'].endswith('surname'):
-                surname = a[0].text
-            elif a.attrib['Name'].endswith('claims/name'):
-                email = a[0].text
-            elif a.attrib['Name'].endswith('emailaddress'):
-                email = a[0].text
+        username, email, firstname, surname = get_user_info(eggsmell)
 
         if not email:
             log.error('Unable to login with ADFS')
             log.error(eggsmell)
             raise ValueError('No email returned with ADFS')
 
-        username = email.split('@', 1)[0].replace('.', '_').lower()
         user = _get_user(username)
         if user:
+            # Existing user
             log.info('Logging in from ADFS with user: {}'.format(username))
         else:
+            # New user, so create a record for them.
             log.info('Creating user from ADFS')
             log.info('email: {} firstname: {} surname: {}'.format(email,
                      firstname.encode('utf8'), surname.encode('utf8')))
@@ -187,6 +173,5 @@ class ADFSRedirectController(toolkit.BaseController):
         pylons.session['adfs-user'] = username
         pylons.session['adfs-email'] = email
         pylons.session.save()
-        toolkit.redirect_to(controller='user', action='dashboard',
-                            id=email)
+        toolkit.redirect_to(controller='user', action='dashboard', id=email)
         return
