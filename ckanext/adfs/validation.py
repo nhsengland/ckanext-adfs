@@ -9,13 +9,6 @@ from M2Crypto import EVP, X509
 
 log = logging.getLogger(__name__)
 
-def get_tag(doc, tagname):
-    """
-    Assume that you don't care about namespaces
-    """
-    for t in doc.iter('*'):
-        if t.tag.endswith(tagname):
-            return t
 
 def get_tag(doc, tagname):
     """
@@ -78,7 +71,7 @@ def get_signature_value(signature):
 def validate_saml(saml, x509_certificates):
     """
     Given a string representation of a SAML response will return a boolean
-    indication of if it's cryptographically valid (i.e. the signature
+    indication of its cryptographic validity (i.e. the signature
     validates). The x509_certificates argument is a set containing string
     representations of the expected valid certificates that could be referenced
     in the incoming SAML.

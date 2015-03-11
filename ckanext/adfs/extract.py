@@ -11,7 +11,7 @@ def get_user_info(saml):
     """
     Given a SAML response will attempt to extract and return the user's
     username, email address, firstname and surname as a tuple. If no values
-    can be found then a tuple of containing None values will be returned.
+    can be found then a tuple containing None values will be returned.
     """
     root = ET.fromstring(saml)
     # Honestly..!
