@@ -1,0 +1,21 @@
+{% ckan_extends %}
+
+{% block pre_primary %}
+  {% if not c.userobj %}
+    <section class="module-content">
+      <p><a href="/user/login">Login</a> to view user profile</p>
+    </section>
+  {% endif %}
+{% endblock %}
+
+{% block content_primary_nav %}
+  {% if c.userobj %}
+    {{ super() }}
+  {% endif %}
+{% endblock %}
+
+{% block secondary_content %}
+  {% if c.userobj %}
+    {{ super() }}
+  {% endif %}
+{% endblock %}

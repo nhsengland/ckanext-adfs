@@ -1,0 +1,24 @@
+{% ckan_extends %}
+
+{% block primary_content %}
+  <article class="module">
+    <div class="module-content">
+      {% block primary_content_inner %}
+        <section aria-label="Log in for CNRA staff">
+          <h1 class="page-heading">CNRA Staff</h1>
+          <p>
+            If you are an employee of a CNRA organization, use the CNRA Log In button on the Log In page to automatically create an account using your enterprise credentials.
+            If it does not work for you, <a href="/contact">contact the Open Data team</a> for alternate account instructions.
+          </p>
+          <a class="btn btn-primary" href="/user/login">Go to Log In</a>
+        </section>
+        <hr>
+        <section aria-label="Registration for external users">
+          <h1 class="page-heading">{{ _('External Users') }}</h1>
+          <p>{{ _('Register for an Account') }}</p>
+          {{ c.form | safe }}
+        </section>
+      {% endblock %}
+    </div>
+  </article>
+{% endblock %}

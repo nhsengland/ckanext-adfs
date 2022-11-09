@@ -16,19 +16,21 @@ def get_certificates(metadata):
     """
     type_path = '{http://www.w3.org/2001/XMLSchema-instance}type'
     key_descriptor_path = '{urn:oasis:names:tc:SAML:2.0:metadata}KeyDescriptor'
+
+    certificates_set = set()
+
     try:
         dom = ET.fromstring(str(metadata))
         for child in list(dom):
             service_type = child.attrib.get(type_path, None)
-            if service_type == 'fed:ApplicationServiceType':
-                return set([x.xpath('string()') for x in
-                           child.findall(key_descriptor_path)])
+            if service_type == 'fed:ApplicationServiceType' or service_type == 'fed:SecurityTokenServiceType':
+                certificates_set |= set([x.xpath('string()') for x in child.findall(key_descriptor_path)])
     except Exception as ex:
         # Do the sensible thing and log what went wrong.
         log.error('UNABLE TO PARSE CERTIFICATE METADATA')
         log.error(metadata)
         log.error(ex)
-    return set()
+    return certificates_set
 
 
 def get_federation_metadata(url):

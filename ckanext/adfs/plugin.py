@@ -1,24 +1,24 @@
 """
 Plugin for our ADFS
 """
-import logging
 import ckan.plugins as plugins
 import ckan.plugins.toolkit as toolkit
-import pylons
-import uuid
-from validation import validate_saml
-from metadata import get_certificates, get_federation_metadata, get_wsfed
-from extract import get_user_info
-
-
-log = logging.getLogger(__name__)
+import ckan.logic.schema
+from ckan.common import session
+from ckanext.adfs import schema
+from metadata import get_federation_metadata, get_wsfed
+try:
+    from ckan.common import config
+except ImportError:
+    from pylons import config
 
 
 # Some awful XML munging.
 WSFED_ENDPOINT = ''
-WTREALM = pylons.config['adfs_wtrealm']
-METADATA = get_federation_metadata(pylons.config['adfs_metadata_url'])
+WTREALM = config['adfs_wtrealm']
+METADATA = get_federation_metadata(config['adfs_metadata_url'])
 WSFED_ENDPOINT = get_wsfed(METADATA)
+AUTH_URL_TEMPLATE = config.get('adfs_url_template','{}?wa=wsignin1.0&wreq=xml&wtrealm={}')
 
 
 if not (WSFED_ENDPOINT):
@@ -26,12 +26,15 @@ if not (WSFED_ENDPOINT):
 
 
 def adfs_authentication_endpoint():
-    url_template = '{}?wa=wsignin1.0&wreq=xml&wtrealm={}'
-    return url_template.format(WSFED_ENDPOINT, WTREALM)
+    try:
+        auth_endpoint = AUTH_URL_TEMPLATE.format(WSFED_ENDPOINT, WTREALM)
+    except:
+        auth_endpoint = '{}?wa=wsignin1.0&wreq=xml&wtrealm={}'.format(WSFED_ENDPOINT, WTREALM)
+    return auth_endpoint
 
 
 def is_adfs_user():
-    return pylons.session.get('adfs-user')
+    return session.get('adfs-user')
 
 
 class ADFSPlugin(plugins.SingletonPlugin):
@@ -43,11 +46,15 @@ class ADFSPlugin(plugins.SingletonPlugin):
     plugins.implements(plugins.IRoutes)
     plugins.implements(plugins.IAuthenticator)
 
-    def update_config(self, config):
+    def update_config(self, config_):
         """
         Add our templates to CKAN's search path
         """
-        toolkit.add_template_directory(config, 'templates')
+        ckan.logic.schema.user_new_form_schema = schema.user_new_form_schema
+        ckan.logic.schema.user_edit_form_schema = schema.user_edit_form_schema
+        ckan.logic.schema.default_update_user_schema = schema.default_update_user_schema
+        toolkit.add_template_directory(config_, 'templates')
+        toolkit.add_resource('fanstatic', 'adfs')
 
     def get_helpers(self):
         return dict(is_adfs_user=is_adfs_user,
@@ -61,11 +68,16 @@ class ADFSPlugin(plugins.SingletonPlugin):
         :param map: Routes map object
         :returns: Modified version of the map object
         """
-        # Route requests for our WAAD redirect URI to a custom controller.
+        # Route requests for our WAAD redirect URI to a custom controller
         map.connect(
             'adfs_redirect_uri', '/adfs/signin/',
-            controller='ckanext.adfs.plugin:ADFSRedirectController',
+            controller='ckanext.adfs.controller:ADFSRedirectController',
             action='login')
+        # Route password reset requests to a custom controller
+        map.connect(
+            'adfs_request_reset', '/user/reset',
+            controller='ckanext.adfs.controller:ADFSUserController',
+            action='request_reset')
         return map
 
     def after_map(self, map):
@@ -81,10 +93,13 @@ class ADFSPlugin(plugins.SingletonPlugin):
     def identify(self):
         """
         Called to identify the user.
+        Get user from repoze.who cookie.
         """
-        user = pylons.session.get('adfs-user')
-        if user:
-            toolkit.c.user = user
+        environ = toolkit.request.environ
+        user = None
+        if 'repoze.who.identity' in environ:
+            user = environ['repoze.who.identity']['repoze.who.userid']
+        toolkit.c.user = user
 
     def login(self):
         """
@@ -96,13 +111,12 @@ class ADFSPlugin(plugins.SingletonPlugin):
         """
         Called at logout.
         """
-        keys_to_delete = [key for key in pylons.session
+        keys_to_delete = [key for key in session
                           if key.startswith('adfs')]
         if keys_to_delete:
             for key in keys_to_delete:
-                del pylons.session[key]
-            pylons.session.save()
-
+                del session[key]
+            session.save()
 
     def abort(self, status_code, detail, headers, comment):
         """
@@ -110,67 +124,3 @@ class ADFSPlugin(plugins.SingletonPlugin):
         to be overriden.
         """
         return (status_code, detail, headers, comment)
-
-
-def _get_user(name):
-    """
-    Return the CKAN user with the given user name, or None.
-    """
-    try:
-        return toolkit.get_action('user_show')(data_dict = {'id': name})
-    except toolkit.ObjectNotFound:
-        return None
-
-
-class FileNotFoundException(Exception):
-    pass
-
-
-class ADFSRedirectController(toolkit.BaseController):
-    """
-    A custom home controller for receiving ADFS authorization responses.
-    """
-
-    def login(self):
-        """
-        Handle eggsmell request from the ADFS redirect_uri.
-        """
-        eggsmell = pylons.request.POST['wresult']
-        # We grab the metadata for each login because due to opaque
-        # bureaucracy and lack of communication the certificates can be
-        # changed. We looked into this and took made the call based upon lack
-        # of user problems and tech being under our control vs the (small
-        # amount of) latency from a network call per login attempt.
-        metadata = get_federation_metadata(pylons.config['adfs_metadata_url'])
-        x509_certificates = get_certificates(metadata)
-        if not validate_saml(eggsmell, x509_certificates):
-            raise ValueError('Invalid signature')
-        username, email, firstname, surname = get_user_info(eggsmell)
-
-        if not email:
-            log.error('Unable to login with ADFS')
-            log.error(eggsmell)
-            raise ValueError('No email returned with ADFS')
-
-        user = _get_user(username)
-        if user:
-            # Existing user
-            log.info('Logging in from ADFS with user: {}'.format(username))
-        else:
-            # New user, so create a record for them.
-            log.info('Creating user from ADFS')
-            log.info('email: {} firstname: {} surname: {}'.format(email,
-                     firstname.encode('utf8'), surname.encode('utf8')))
-            log.info('Generated username: {}'.format(username))
-            # TODO: Add the new user to the NHSEngland group? Check this!
-            user = toolkit.get_action('user_create')(
-                context={'ignore_auth': True},
-                data_dict={'name': username,
-                           'fullname': firstname + ' ' + surname,
-                           'password': str(uuid.uuid4()),
-                           'email': email})
-        pylons.session['adfs-user'] = username
-        pylons.session['adfs-email'] = email
-        pylons.session.save()
-        toolkit.redirect_to(controller='user', action='dashboard', id=email)
-        return

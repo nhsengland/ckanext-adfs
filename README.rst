@@ -38,6 +38,24 @@ If you merely want to test this extension you can take out a free trial at the
 Azure website (although you'll need to provide credit card details to prove
 you're not a bot).
 
+Installation:
+============
+
+Install the required packages::
+
+    sudo apt-get install libxml2 libxml2-dev libxslt1.1 libxslt1-dev openssl libssl-dev swig python-dev
+
+To install ckanext-adfs for development, activate your CKAN virtualenv and do::
+
+    git clone https://github.com/OpenGov-OpenData/ckanext-adfs.git
+    cd ckanext-adfs
+    git checkout cnra
+    python setup.py develop
+    pip install -r requirements.txt
+
+Add ``adfs`` to the ``ckan.plugins`` setting in your CKAN config file (by default the config file is located at
+``/etc/ckan/default/production.ini``).
+
 Configure:
 =========
 
@@ -57,6 +75,8 @@ In your CKAN's settings.ini file you need to provide two settings in the
 * adfs_wtrealm - the `APP ID URI` setting found in the "Get Started" / "Enable Users to Sign On" section on the "home" page for the application integrating with ADFS on the Azure website. This is usually the same as the APP ID URI you define in the settings for the application.
 
 * adfs_metadata_url - a URL pointing to a remote file called `FederationMetadata.xml` containing the ADFS_NAMESPACE and adfs_x509 related values. This URL is in the "Federation Metadata Document URL" value in the "Enable Users to Sign On" section of the Azure website (at current time of writing).
+
+* adfs_url_template - a template snippet for the URL that points to the ADFS authentication endpoint (e.g. {}idpinitiatedsignon.aspx?loginToRp={}). This template uses the wsfed endpoint extracted from FederationMetadata.xml and adfs_wtrealm.
 
 *A WORD OF WARNING* Microsoft appears to change its UI in the Azure website
 quite often so you may need to poke around to find the correct settings. It has

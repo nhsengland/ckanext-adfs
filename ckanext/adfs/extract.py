@@ -26,11 +26,9 @@ def get_user_info(saml):
             firstname = attr[0].text
         elif attr.attrib['Name'].endswith('surname'):
             surname = attr[0].text
-        elif attr.attrib['Name'].endswith('claims/name'):
-            email = attr[0].text
         elif attr.attrib['Name'].endswith('emailaddress'):
             email = attr[0].text
 
-    if email:
-        username = email.split('@', 1)[0].replace('.', '_').lower()
+    username = email
+
     return (username, email, firstname, surname)

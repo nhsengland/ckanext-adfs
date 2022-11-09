@@ -2,16 +2,15 @@
 
 {% block subtitle %}{{ _('Login') }}{% endblock %}
 
-{% block pre_primary %}
+{% block primary_content %}
   <section class="module">
     <div class="module-content">
-        <h1 class="page-heading">NHS England Sign In</h1>
-        <p>For employees of NHS England, click the NHS Login button below to
-        sign in with your <em>username@england.nhs.uk</em> account (the one
-        you use for Sharepoint).</p>
-        <p><a class="btn btn-primary" href="{{ h.adfs_authentication_endpoint() }}">NHS Sign In</a></p>
+       <h1 class="page-heading">CNRA Sign In</h1>
+        <p>For CNRA staff connected with an enterprise account only.</p>
+        <p><a class="btn btn-primary" href="{{ h.adfs_authentication_endpoint() }}">CNRA Log In</a></p>
     </div>
   </section>
+  <hr>
   <section class="module">
     <div class="module-content">
       <h2 class="page-heading">External Login</h2>
@@ -20,13 +19,13 @@
       {% endblock %}
     </div>
   </section>
+{% endblock %}
+
+{% block secondary_content %}
   {% if h.check_access('user_create') %}
     <section class="module module-narrow module-shallow">
       <h2 class="module-heading">{{ _('Need an Account?') }}</h2>
       <div class="module-content">
-        <p>{% trans %}If you don't work for NHS England, then sign right up,
-        it only takes a minute. (If you <em>do</em> work for NHS England use
-        the NHS Sign In button.){% endtrans %}</p>
         <p class="action">
           <a class="btn" href="{{ h.url_for(controller='user', action='register') }}">{{ _('Create an Account') }}</a>
         </p>
@@ -35,14 +34,12 @@
   {% endif %}
 
   <section class="module module-narrow module-shallow">
-    <h2 class="module-heading">{{ _('Forgotten your password?') }}</h2>
+    <h2 class="module-heading">{{ _('Forgot Password?') }}</h2>
     <div class="module-content">
-      <p>{% trans %}If you don't work for NHS England, use our password
-      recovery form to reset it.{% endtrans %}</p>
+      <p>{% trans %}For external user accounts only.{% endtrans %}</p>
       <p class="action">
-        <a class="btn" href="{{ h.url_for(controller='user', action='request_reset') }}">{{ _('Forgot your password?') }}</a>
+        <a class="btn" href="{{ h.url_for(controller='user', action='request_reset') }}">{{ _('Request Reset') }}</a>
       </p>
     </div>
   </section>
 {% endblock %}
-
