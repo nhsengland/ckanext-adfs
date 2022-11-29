@@ -49,7 +49,6 @@ To install ckanext-adfs for development, activate your CKAN virtualenv and do::
 
     git clone https://github.com/OpenGov-OpenData/ckanext-adfs.git
     cd ckanext-adfs
-    git checkout cnra
     python setup.py develop
     pip install -r requirements.txt
 
