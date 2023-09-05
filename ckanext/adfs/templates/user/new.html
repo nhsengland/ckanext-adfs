@@ -4,13 +4,14 @@
   <article class="module">
     <div class="module-content">
       {% block primary_content_inner %}
-        <section aria-label="Log in for CNRA staff">
-          <h1 class="page-heading">CNRA Staff</h1>
+        {% set label_text = "Log in for " + g.new_page_title %}
+        <section aria-label="{{ label_text }}">
+          <h1 class="page-heading">{{ g.new_page_header}}</h1>
           <p>
-            If you are an employee of a CNRA organization, use the CNRA Log In button on the Log In page to automatically create an account using your enterprise credentials.
+            {{ g.new_page_description}}
             If it does not work for you, <a href="/contact">contact the Open Data team</a> for alternate account instructions.
           </p>
-          <a class="btn btn-primary" href="/user/login">Go to Log In</a>
+          <a class="btn btn-primary" href="/user/login">Go to {{ g.login_button_name }}</a>
         </section>
         <hr>
         <section aria-label="Registration for external users">

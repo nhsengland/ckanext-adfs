@@ -5,9 +5,9 @@
 {% block primary_content %}
   <section class="module">
     <div class="module-content">
-       <h1 class="page-heading">CNRA Sign In</h1>
-        <p>For CNRA staff connected with an enterprise account only.</p>
-        <p><a class="btn btn-primary" href="{{ h.adfs_authentication_endpoint() }}">CNRA Log In</a></p>
+       <h1 class="page-heading">{{ g.login_page_title }}</h1>
+        <p>{{ g.login_page_description }}</p>
+        <p><a class="btn btn-primary" href="{{ h.adfs_authentication_endpoint() }}">{{ g.login_button_name }}</a></p>
     </div>
   </section>
   <hr>

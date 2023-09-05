@@ -1,0 +1,26 @@
+{% ckan_extends %}
+
+{% import 'macros/form.html' as form %}
+
+{% block admin_form %}
+    {{ super() }}
+
+    {{ form.input('login_page_title', id='login-page-title', label=_('Login page title'), value=data['login_page_title'], error=errors['login_page_title']) }}
+
+    {{ form.input('login_page_description', id='login-page-description', label=_('Login page description'), value=data['login_page_description'], error=errors['login_page_description']) }}
+
+    {{ form.input('login_button_name', id='login-button-name', label=_('Login button name'), value=data['login_button_name'], error=errors['login_button_name']) }}
+
+    {{ form.input('new_page_title', id='new-page-title', label=_('New page title'), value=data['new_page_title'], error=errors['new_page_title']) }}
+
+    {{ form.input('new_page_description', id='new-page-description', label=_('New page description'), value=data['new_page_description'], error=errors['new_page_description']) }}
+{% endblock %}
+
+{% block admin_form_help %}
+    {{ super() }}
+    <p><strong>Login Page Title:</strong> This text will appear as a login page title.</p>
+    <p><strong>Login Page Description:</strong> This description will appear on a login page.</p>
+    <p><strong>Login Button Name:</strong> This text will appear as SSO button text.</p>
+    <p><strong>New Page Title:</strong> This text will appear as a title on the new user page.</p>
+    <p><strong>New Page Description:</strong> This description will appear on a create new user page description.</p>
+{% endblock %}

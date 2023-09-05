@@ -6,6 +6,8 @@ import ckan.plugins.toolkit as toolkit
 import ckan.logic.schema
 from ckan.common import session
 from ckanext.adfs import schema
+from six import text_type
+
 from metadata import get_federation_metadata, get_wsfed
 try:
     from ckan.common import config
@@ -55,6 +57,21 @@ class ADFSPlugin(plugins.SingletonPlugin):
         ckan.logic.schema.default_update_user_schema = schema.default_update_user_schema
         toolkit.add_template_directory(config_, 'templates')
         toolkit.add_resource('fanstatic', 'adfs')
+
+    def update_config_schema(self, schema):
+        ignore_missing = toolkit.get_validator('ignore_missing')
+        ignore_not_sysadmin = toolkit.get_validator('ignore_not_sysadmin')
+
+        schema.update({
+            # This is a custom configuration option
+            'login_button_name': [ignore_missing, ignore_not_sysadmin, text_type],
+            'login_page_title': [ignore_missing, ignore_not_sysadmin, text_type],
+            'new_page_title': [ignore_missing, ignore_not_sysadmin, text_type],
+            'login_page_description': [ignore_missing, ignore_not_sysadmin, text_type],
+            'new_page_description': [ignore_missing, ignore_not_sysadmin, text_type]
+        })
+
+        return schema
 
     def get_helpers(self):
         return dict(is_adfs_user=is_adfs_user,
